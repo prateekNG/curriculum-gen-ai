@@ -72,8 +72,8 @@ async function generateProjectsFromRandomIdeas(genAI, numIdeas = 10, outputPath 
     }
 
     ideas.forEach(async (idea) => {
-        await generateProjectRandom(genAI, idea, outputPath);
         await new Promise(resolve => setTimeout(resolve, 3000));
+        await generateProjectRandom(genAI, idea, outputPath);
     });
 
     // Read the just the project file names inside the ./projects directory, exclude the directories
@@ -81,7 +81,7 @@ async function generateProjectsFromRandomIdeas(genAI, numIdeas = 10, outputPath 
         .filter(dirent => dirent.isFile())
         .map(dirent => dirent.name)
         .forEach(async (fileName) => {
-            await reviewAndModifyProjectGuide(genAI, `${outputPath}/${fileName}`, outputPath);
+            await reviewAndModifyProjectGuide(genAI, `${fileName}`, outputPath);
             // await new Promise(resolve => setTimeout(resolve, 3000));
         });
 
@@ -89,4 +89,4 @@ async function generateProjectsFromRandomIdeas(genAI, numIdeas = 10, outputPath 
 }
 
 // generateProjectsFromDetailedIdeas(genAI);
-generateProjectsFromRandomIdeas(genAI, 5, './projects/RandomeIdeas1');
+generateProjectsFromRandomIdeas(genAI, 5, './projects/RandomIdeas2');

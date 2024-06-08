@@ -40,7 +40,7 @@ async function generateProject(genAI, idea, outputPath) {
 
   // read the output.txt which has the content of the scaffolded project with syntax highlighting
   const seedProjectFilesContent = fs.readFileSync('./seed-projects/udemy-react-mega/Project Code, Files/output.txt', 'utf8');
-  const seedProjectPlaylist = fs.readFileSync('./seed-projects/udemy-react-mega/playlist.txt', 'utf8');
+  // const seedProjectPlaylist = fs.readFileSync('./seed-projects/udemy-react-mega/playlist.txt', 'utf8');
 
   const prompt = `Analyze the project files of an online scaffolded React project provided below (in markdown format with syntax highlighting) \
 and the list of the titles of the videos in its playlist, to get inspirations and create a detailed scaffolded project guide (in a markdown format) for an idea provided below, \
@@ -69,15 +69,12 @@ async function generateProjectRandom(genAI, idea, outputPath) {
 
   // read the output.txt which has the content of the scaffolded project with syntax highlighting
   const seedProjectFilesContent = fs.readFileSync('./seed-projects/udemy-react-mega/Project Code, Files/output.txt', 'utf8');
-  const seedProjectPlaylist = fs.readFileSync('./seed-projects/udemy-react-mega/playlist.txt', 'utf8');
-
   
   const prompt = `Analyze the project files of an online scaffolded React project provided below (in markdown format with syntax highlighting) \
 and the list of the titles of the videos in its playlist, to create a detailed scaffolded project guide (in a markdown format) with similar complexity/depth, \
 for students learning React by building projects themselves, breaking the project into phases and steps with clear instructions (without hand-holding or spoon-feeding) \
 along with only the necessary hints code snippets/examples, based on idea provided below.\n\
 The content of the project files with relative path:\n${seedProjectFilesContent}\n\n\
-The playlist of the scaffolded project for learning React:\n${seedProjectPlaylist}\n\n\
 Please create a detailed scaffolded project guide, for programming students learning React by building projects themseleves, for the idea: ${idea}\n\n\
 No need to provide any other comments or explanations, just the scaffolded project guide (in markdown format).`
 
