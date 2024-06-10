@@ -17,8 +17,14 @@ OUTPUT_FILE="$OUTPUT_DIR/$PROJECT_NAME.md"
 
 # Hardcoded list of files and directories to ignore
 IGNORE_LIST=(
-  "ignored_file.txt"
-  "ignored_directory"
+  "README.md"
+  "helper-scripts/output"
+  "helper-scripts/keyPrinciplesForScaffoldingProjects.md"
+  "seed-projects"
+  "projects"
+  "projects-archive"
+  "seed-ideas"
+  "ideas.json"
   # Add more files or directories to ignore here
 )
 
@@ -74,7 +80,8 @@ process_files() {
 
       echo "### $file_path" >>"$OUTPUT_FILE"
       echo "\`\`\`$ext" >>"$OUTPUT_FILE"
-      cat "$entry" >>"$OUTPUT_FILE"
+      cat $entry >>"$OUTPUT_FILE"
+      echo ""  >> "$OUTPUT_FILE" 
       echo "\`\`\`" >>"$OUTPUT_FILE"
       echo '' >>"$OUTPUT_FILE"
     fi
