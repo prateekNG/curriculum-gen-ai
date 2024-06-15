@@ -39,7 +39,7 @@ async function generateProject(genAI, idea, outputPath) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   // read the output.txt which has the content of the scaffolded project with syntax highlighting
-  const seedProjectFilesContent = fs.readFileSync('./seed-projects/udemy-react-mega/Project Code, Files/output.txt', 'utf8');
+  const seedProjectFilesContent = fs.readFileSync('./seed-projects/udemy-react-mega-output.txt', 'utf8');
   // const seedProjectPlaylist = fs.readFileSync('./seed-projects/udemy-react-mega/playlist.txt', 'utf8');
 
   const prompt = `Analyze the project files of an online scaffolded React project provided below (in markdown format with syntax highlighting) \
