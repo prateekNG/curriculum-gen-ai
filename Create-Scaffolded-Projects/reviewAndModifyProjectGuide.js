@@ -17,16 +17,41 @@ Feel free to change the order, add/remove sections, phases or code snippets, etc
 The scoffolded project guide:\n${projectGuideMD}\n\n
 No need to provide any other comments or explanations, just the scaffolded project guide.`
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
-  console.log(text);
+  // Error handling for API requests
+  let attempts = 0;
+  const maxAttempts = 3;
+  while (attempts < maxAttempts) {
+    try {
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      console.log(text);
 
-  // extracts the file name from the path 
-  // const fileName = filePath.split('/').pop();
+      // extracts the file name from the path 
+      // const fileName = filePath.split('/').pop();
 
-  // create a file for each project with name as the idea and write the text to the file
-  fs.writeFileSync(`${outputPath}/improved/${fileName}`, text);
+      // create a directory for the improved project guides if it does not exist
+      if (!fs.existsSync(`${outputPath}/improved`)) {
+        fs.mkdirSync(`${outputPath}/improved`);
+      }
+
+      // create a file for each project with name as the idea and write the text to the file
+      fs.writeFileSync(`${outputPath}/improved/${fileName}`, text);
+      return; // Exit the loop if successful
+    } catch (error) {
+      attempts++;
+      console.error(`Error reviewing and modifying project guide (attempt ${attempts}):`, error);
+
+      if (attempts >= maxAttempts) {
+        throw new Error(`Failed to review and modify project guide after ${maxAttempts} attempts.`);
+      }
+
+      // Exponential backoff for API rate limiting
+      const delay = 2 ** attempts * 1000;
+      console.log(`Waiting for ${delay / 1000} seconds before retrying...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
 }
 
 module.exports = {

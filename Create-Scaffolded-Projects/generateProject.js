@@ -1,3 +1,4 @@
+// generateProject.js
 /*
  *  Run the command: install npm install @google/generative-ai 
  */
@@ -9,27 +10,27 @@ const scaffoldedLearningPath = `## Example Scaffolded React Learning Path:\n\
   Objective: Understand the basics of React, components, and JSX.\n
   Resources: Simple tutorial to create a "Hello, World!" React app.\n
   Milestone: Create a basic React component that renders static content.\n
-2. Props and State\n
+1. Props and State\n
   Objective: Learn how to pass data between components and manage state.\n
   Resources: Tutorials and examples on props and state management.\n
   Milestone: Build a simple form with controlled components and handle form submission.\n
-3. Component Lifecycle and Hooks\n
+1. Component Lifecycle and Hooks\n
   Objective: Understand component lifecycle methods and introduce hooks.\n
   Resources: Articles or videos explaining lifecycle methods and hooks.\n
   Milestone: Create a component that fetches data from an API and displays it.\n
-4. Advanced State Management\n
+1. Advanced State Management\n
   Objective: Explore context API and state management libraries like Redux.\n
   Resources: Tutorials on Context API and Redux basics.\n
   Milestone: Implement global state management in a small app.\n
-5. Routing with React Router\n
+1. Routing with React Router\n
   Objective: Learn how to implement client-side routing.\n
   Resources: Guides on React Router setup and usage.\n
   Milestone: Build a multi-page application with navigation.\n
-6. Styling Components\n
+1. Styling Components\n
   Objective: Understand various ways to style React components (CSS, styled-components, CSS modules).\n
   Resources: Examples and tutorials on different styling methods.\n
   Milestone: Apply styles to a React project and create a responsive design.\n
-7. Capstone Project\n
+1. Capstone Project\n
   Objective: Combine all learned concepts in a comprehensive project.\n
   Resources: Minimal guidance, encourage independent problem-solving.\n
   Milestone: Complete a fully-functional, styled, multi-page React application.\n\n`
@@ -52,15 +53,33 @@ along with the necessary hints or code snippets/examples and essential resources
 ## To scaffold a React project for your students effectively, follow these steps::\n${getScaffoldingSteps()}\n\n\
 Provide just the detailed scaffolded project guide (in markdown format) as the output.`
 
-  console.log(prompt)
+  // Error handling for API requests
+  let attempts = 0;
+  const maxAttempts = 3;
+  while (attempts < maxAttempts) {
+    try {
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      // console.log(text);
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
-  // console.log(text);
+      // create a file for each project with name as the idea and write the text to the file
+      fs.writeFileSync(`${outputPath}/${idea['idea'].split(' ').join('_')}.md`, text);
+      return; // Exit the loop if successful
+    } catch (error) {
+      attempts++;
+      console.error(`Error generating project (attempt ${attempts}):`, error);
 
-  // create a file for each project with name as the idea and write the text to the file
-  fs.writeFileSync(`${outputPath}/${idea['idea'].split(' ').join('_')}.md`, text);
+      if (attempts >= maxAttempts) {
+        throw new Error(`Failed to generate project after ${maxAttempts} attempts.`);
+      }
+
+      // Exponential backoff for API rate limiting
+      const delay = 2 ** attempts * 1000;
+      console.log(`Waiting for ${delay / 1000} seconds before retrying...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
 }
 
 async function generateProjectRandom(genAI, idea, outputPath) {
@@ -69,7 +88,7 @@ async function generateProjectRandom(genAI, idea, outputPath) {
 
   // read the output.txt which has the content of the scaffolded project with syntax highlighting
   const seedProjectFilesContent = fs.readFileSync('./seed-projects/udemy-react-mega/Project Code, Files/output.txt', 'utf8');
-  
+
   const prompt = `Analyze the project files of an online scaffolded React project provided below (in markdown format with syntax highlighting) \
 and the list of the titles of the videos in its playlist, to create a detailed scaffolded project guide (in a markdown format) with similar complexity/depth, \
 for students learning React by building projects themselves, breaking the project into phases and steps with clear instructions (without hand-holding or spoon-feeding) \
@@ -80,13 +99,33 @@ No need to provide any other comments or explanations, just the scaffolded proje
 
 
   // console.log(prompt)
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
-  // console.log(text);
+  // Error handling for API requests
+  let attempts = 0;
+  const maxAttempts = 3;
+  while (attempts < maxAttempts) {
+    try {
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      // console.log(text);
 
-  // create a file for each project with name as the idea and write the text to the file
-  fs.writeFileSync(`${outputPath}/${idea.split(':')[0].split(' ').join('_')}.md`, text);
+      // create a file for each project with name as the idea and write the text to the file
+      fs.writeFileSync(`${outputPath}/${idea.split(':')[0].split(' ').join('_')}.md`, text);
+      return; // Exit the loop if successful
+    } catch (error) {
+      attempts++;
+      console.error(`Error generating random project (attempt ${attempts}):`, error);
+
+      if (attempts >= maxAttempts) {
+        throw new Error(`Failed to generate random project after ${maxAttempts} attempts.`);
+      }
+
+      // Exponential backoff for API rate limiting
+      const delay = 2 ** attempts * 1000;
+      console.log(`Waiting for ${delay / 1000} seconds before retrying...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
 }
 
 function formIdeaString(idea) {
@@ -97,7 +136,7 @@ Complexity of the project (estimated time in hours): ${idea['complexity']} (${id
 React concepts used: ${idea['react concepts'].join(', ')}`
 }
 
-function getScaffoldingSteps(){
+function getScaffoldingSteps() {
   // return fs.readFileSync('./seed-projects/scaffoldingSteps.txt', 'utf8');
   return fs.readFileSync('./helper-scripts/keyPrinciplesForScaffoldingProjects.md', 'utf8')
 }

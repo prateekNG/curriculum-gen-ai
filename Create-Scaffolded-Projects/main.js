@@ -1,7 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require('fs');
 
-const { generateProject,generateProjectRandom } = require('./generateProject');
+const { generateProject, generateProjectRandom } = require('./generateProject');
 const { generateIdeas } = require('./generateIdeas');
 const { reviewAndModifyProjectGuide } = require('./reviewAndModifyProjectGuide');
 
@@ -11,82 +11,82 @@ const apiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);
 
 async function main() {
-    // Generate project ideas
-    const ideas = await generateIdeas(genAI, 10);
+  // Generate project ideas
+  const ideas = await generateIdeas(genAI, 10);
 
-    // Log the ideas
-    console.log(ideas);
+  // Log the ideas
+  console.log(ideas);
 
-    // Generate projects based on the ideas after waiting for 5 seconds to avoid any the rate limit
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    await generateProjectRandom(genAI, ideas);
+  // Generate projects based on the ideas after waiting for 5 seconds to avoid any the rate limit
+  await new Promise(resolve => setTimeout(resolve, 5000));
+  await generateProjectRandom(genAI, ideas);
 
-    // Read the just the project file names inside the ./projects directory, exclude the directories
-    const projectFiles = fs.readdirSync('./projects', { withFileTypes: true })
-        .filter(dirent => dirent.isFile())
-        .map(dirent => dirent.name);
+  // Read the just the project file names inside the ./projects directory, exclude the directories
+  const projectFiles = fs.readdirSync('./projects', { withFileTypes: true })
+    .filter(dirent => dirent.isFile())
+    .map(dirent => dirent.name);
 
 
-    // Log the project files
-    console.log(projectFiles);
+  // Log the project files
+  console.log(projectFiles);
 
-    projectFiles.forEach(async (fileName) => {
-        await reviewAndModifyProjectGuide(genAI, fileName);
-    });
+  projectFiles.forEach(async (fileName) => {
+    await reviewAndModifyProjectGuide(genAI, fileName);
+  });
 }
 
 async function generateProjectsFromDetailedIdeas(genAI, numIdeas = 10, outputPath = './projects/DetailedIdeas') {
-    const ideasJSON = JSON.parse(fs.readFileSync('./seed-ideas/detailedIdeas.json', 'utf8'));
-    const ideas = ideasJSON.ideas;
+  const ideasJSON = JSON.parse(fs.readFileSync('./seed-ideas/detailedIdeas.json', 'utf8'));
+  const ideas = ideasJSON.ideas;
 
-    // Creating the output directory if it does not exist
-    if (!fs.existsSync(outputPath)) {
-        fs.mkdirSync(outputPath);
-    }
+  // Creating the output directory if it does not exist
+  if (!fs.existsSync(outputPath)) {
+    fs.mkdirSync(outputPath);
+  }
 
-    ideas.forEach(async (idea) => {
-        await generateProject(genAI, idea, outputPath);
-    });
+  for (const idea of ideas) { // Using for...of loop for better async/await handling
+    await generateProject(genAI, idea, outputPath);
+  }
 
-    // Read the just the project file names inside the ./projects directory, exclude the directories
-    const projectFiles = fs.readdirSync(outputPath, { withFileTypes: true })
-        .filter(dirent => dirent.isFile())
-        .map(dirent => dirent.name);
-    
-    // Review and modify the project guides
-    projectFiles.forEach(async (fileName) => {
-        await reviewAndModifyProjectGuide(genAI, fileName, outputPath);
-    });
+  // Read the just the project file names inside the ./projects directory, exclude the directories
+  const projectFiles = fs.readdirSync(outputPath, { withFileTypes: true })
+    .filter(dirent => dirent.isFile())
+    .map(dirent => dirent.name);
+
+  // Review and modify the project guides
+  for (const fileName of projectFiles) { // Using for...of loop for better async/await handling
+    await reviewAndModifyProjectGuide(genAI, fileName, outputPath);
+  }
 }
 
 async function generateProjectsFromRandomIdeas(genAI, numIdeas = 10, outputPath = './projects/RandomIdeas') {
-    // Generate project ideas
-    const ideas = await generateIdeas(genAI, 10);
+  // Generate project ideas
+  const ideas = await generateIdeas(genAI, numIdeas);
 
-    // Log the ideas
-    console.log(`New Ideas:\n ${ideas}`);
+  // Log the ideas
+  console.log(`New Ideas:\n ${ideas}`);
 
-    // Creating the output directory if it does not exist
-    if (!fs.existsSync(outputPath)) {
-        fs.mkdirSync(outputPath);
-    }
+  // Creating the output directory if it does not exist
+  if (!fs.existsSync(outputPath)) {
+    fs.mkdirSync(outputPath);
+  }
 
-    ideas.forEach(async (idea) => {
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        await generateProjectRandom(genAI, idea, outputPath);
-    });
+  for (const idea of ideas) { // Using for...of loop for better async/await handling
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    await generateProjectRandom(genAI, idea, outputPath);
+  }
 
-    // Read the just the project file names inside the ./projects directory, exclude the directories
-    const projectFiles = fs.readdirSync(outputPath, { withFileTypes: true })
-        .filter(dirent => dirent.isFile())
-        .map(dirent => dirent.name)
-        .forEach(async (fileName) => {
-            await reviewAndModifyProjectGuide(genAI, `${fileName}`, outputPath);
-            // await new Promise(resolve => setTimeout(resolve, 3000));
-        });
+  // Read the just the project file names inside the ./projects directory, exclude the directories
+  const projectFiles = fs.readdirSync(outputPath, { withFileTypes: true })
+    .filter(dirent => dirent.isFile())
+    .map(dirent => dirent.name);
 
-    
+  // Review and modify the project guides
+  for (const fileName of projectFiles) { // Using for...of loop for better async/await handling
+    await reviewAndModifyProjectGuide(genAI, `${fileName}`, outputPath);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
 }
 
 // generateProjectsFromDetailedIdeas(genAI);
-generateProjectsFromRandomIdeas(genAI, 5, './projects/RandomIdeas2');
+generateProjectsFromRandomIdeas(genAI, 2, './projects/RandomIdeas3');
