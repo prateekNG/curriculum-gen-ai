@@ -65,6 +65,51 @@ Give the output in the following format:\n
   }
 }
 
+async function generateIdeasDetailed(genAI, numIdeas = 10) {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  
+    // Read the seedIdeas.json file
+    const seedIdeas = JSON.parse(fs.readFileSync('./seed-ideas/detailedIdeas.json', 'utf8'));
+    const seedIdeasArray = seedIdeas.ideas;
+
+    const prompt = `Analyze the array given below, containing 50+ detailed ideas for basic React projects, in json format, and take inspiration from or build on them to generate another such array with ${numIdeas} different, specific (to Indian target audience), and interesting idea(s) with varying complexity for learning React by building projects.\nThe array is as follows:\n ${JSON.stringify(seedIdeasArray)}\n\nMake sure not to repeat any of the ideas from the original array, or any other ideas that are too similar to them. Make sure you include all the fields, from the original array, in the resulting json and give the output in the following format:\n{\n\t"ideas": [] // Resulting array of ${numIdeas} idea(s)\n}`
+    
+    console.log(prompt)
+
+    // Generate content based on the prompt, with response type as json
+    model.generationConfig.responseMimeType = "application/json"
+  
+    // Error handling for API requests
+    let attempts = 0;
+    const maxAttempts = 3;
+    while (attempts < maxAttempts) {
+      try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+  
+        // Read the result into an array
+        const newIdeas = JSON.parse(text);
+        const newIdeasArray = newIdeas.ideas;
+  
+        return newIdeasArray;
+      } catch (error) {
+        attempts++;
+        console.error(`Error generating ideas (attempt ${attempts}):`, error);
+  
+        if (attempts >= maxAttempts) {
+          throw new Error(`Failed to generate ideas after ${maxAttempts} attempts.`);
+        }
+  
+        // Exponential backoff for API rate limiting
+        const delay = 2 ** attempts * 1000;
+        console.log(`Waiting for ${delay / 1000} seconds before retrying...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
 module.exports = {
-  generateIdeas
+  generateIdeas,
+  generateIdeasDetailed
 }
