@@ -94,7 +94,7 @@ async function generateProjectsFromRandomIdeas(genAI, numIdeas = 10, outputPath 
 async function generateProjectsFromRandomDetailedIdeas(genAI, numIdeas = 10, outputPath = './projects/RandomDetailedIdeas') {
 
     // Generate project ideas
-    const ideas = await generateIdeasDetailed(genAI, 10);
+    const ideas = await generateIdeasDetailed(genAI, numIdeas);
     
     // Log the ideas
     console.log(ideas);
